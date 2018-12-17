@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.join(BASE_DIR, "DSD"))
 SECRET_KEY = 'scm@296-*1wbb2x!u7f#aw61r2u*_dtu+xe1!ukaw6v4o!we1i'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -121,8 +121,8 @@ TIME_ZONE = 'Asia/Shanghai'
 USE_I18N = True
 
 USE_L10N = True
-
-USE_TZ = True
+# fix the wrong timezone
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

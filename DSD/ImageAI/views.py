@@ -9,13 +9,14 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+URL = os.environ.get('DSDURL') or "http://192.168.2.89:8080/bg/file?id=" 
 
 def get_image(image_id):
     """发送请求，获取图片内容"""
-    url = "http://192.168.2.89:8080/bg/file?id=" + image_id
+    url = URL + image_id
     response = requests.get(url)
     image = response.content  # bytes
-    print(image[:20], type(image))
+    # print(image[:20], type(image))
     if image:
         return image
     else:
@@ -28,19 +29,22 @@ class ImagesRecognition(APIView):
     def get(self, request, image_id):
         """接收图片，返回识别结果"""
         if not image_id:
-            return Response({"msg": "缺少图片id"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg": "lack of image_id"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             image = get_image(image_id)
 
+            saved_path = os.path.join(os.getcwd(), 'ImageAI/retinanet/finished')
+            if not os.path.isdir(saved_path):
+                os.makedirs(saved_path)
+
             if image is not None:
-                saved_path = os.path.join(os.getcwd(), 'ImageAI/retinanet/finished')
                 with open(saved_path + "/{}.jpg".format(image_id), "wb") as f:
                     f.write(image)
             else:
-                return Response({"msg": "图片获取失败"}, status=status.HTTP_204_NO_CONTENT)
+                return Response({"msg": "download image failed"}, status=status.HTTP_204_NO_CONTENT)
         except Exception:
-                return Response({"msg": "图片下载出现异常"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                return Response({"msg": "download image raise Exception"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
         from ImageAI.retinanet.examples import ResNet50RetinaNet
         try:
@@ -49,7 +53,7 @@ class ImagesRecognition(APIView):
             if result:
                 return Response(result, status=status.HTTP_200_OK)
             else:
-                return Response({"msg": "图片识别失败"}, status=status.HTTP_204_NO_CONTENT)
+                return Response({"msg": "image recognition failed"}, status=status.HTTP_204_NO_CONTENT)
         except Exception:
             # print("异常")
             return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)

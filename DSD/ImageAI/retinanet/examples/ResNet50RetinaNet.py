@@ -132,6 +132,9 @@ def predict(image_id):
     finished_path = os.path.join(os.getcwd(), 'ImageAI/retinanet/finished')
     plt.savefig(finished_path + "/{}.jpg".format(image_id))
 
+    # 关闭画图figure，立即释放内存
+    plt.close()
+
     with open(finished_path + "/{}.jpg".format(image_id), "rb") as f:
         img = f.read()
 
