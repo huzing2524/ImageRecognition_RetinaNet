@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import gc
 import os
 # import time
 import base64
@@ -77,6 +78,16 @@ labels_to_names = {0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'air
                    79: 'toothbrush'}
 
 
+def garbage_process(func):
+    """垃圾回收，清理内存"""
+    def wrapper(*args, **kwargs):
+        pro = func(*args, **kwargs)
+        gc.collect()
+        return pro
+    return wrapper
+
+
+@garbage_process
 def predict(image_id):
     """
     image_id: 请求图片id
@@ -123,17 +134,19 @@ def predict(image_id):
     draw_caption(draw, b, caption)
 
     # 画图
-    plt.figure(figsize=(30, 30))
+    fig = plt.figure(figsize=(30, 30))
     plt.axis('off')
     plt.imshow(draw)
     # 显示图片
     # plt.show()
     # 保存图片
     finished_path = os.path.join(os.getcwd(), 'ImageAI/retinanet/finished')
-    plt.savefig(finished_path + "/{}.jpg".format(image_id))
+    fig.savefig(finished_path + "/{}.jpg".format(image_id))
 
-    # 关闭画图figure，立即释放内存
+    # 关闭画图figure，关闭窗口
+    plt.clf()
     plt.close()
+    del fig
 
     with open(finished_path + "/{}.jpg".format(image_id), "rb") as f:
         img = f.read()
